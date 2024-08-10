@@ -33,7 +33,7 @@ def register_view(request):
                 last_name=lastname,
             )
             user.save()
-            return Response({"status": "Success"}, status=status.HTTP_200_OK)
+            return Response({"status": "Success"}, status=status.HTTP_201_CREATED)
         except Exception as ex:
             return Response(
                 {"status": "Error"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
