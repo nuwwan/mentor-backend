@@ -30,3 +30,6 @@ class JWTAuthBackend(BaseBackend):
         except AuthUser.DoesNotExist:
             raise AuthenticationFailed("User doesn't Exists")
         return (user, token)
+
+    def authenticate_header(self, request):
+        return "Bearer"
