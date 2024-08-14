@@ -10,12 +10,27 @@ class Tag(models.Model):
         return self.title
 
 
+class Timeline(models.Model):
+    title = models.CharField(max_length=200)
+    user = models.ForeignKey(
+        AuthUser, on_delete=models.CASCADE, related_name="timelines"
+    )
+    subject = models.CharField(max_length=3, choices=Subject.choices)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return self.title
+
+
 class Mentorship(models.Model):
     mentor = models.ForeignKey(
         AuthUser, on_delete=models.CASCADE, related_name="mentees"
     )
     mentee = models.ForeignKey(
         AuthUser, on_delete=models.CASCADE, related_name="mentors"
+    )
+    timeline = models.ForeignKey(
+        Timeline, on_delete=models.CASCADE, related_name="mentorships"
     )
     created_date = models.DateTimeField(auto_now_add=True)
     subject = models.CharField(max_length=3, choices=Subject.choices)
@@ -51,18 +66,6 @@ class Task(models.Model):
         return self.title
 
 
-class Timeline(models.Model):
-    title = models.CharField(max_length=200)
-    user = models.ForeignKey(
-        AuthUser, on_delete=models.CASCADE, related_name="timelines"
-    )
-    subject = models.CharField(max_length=3, choices=Subject.choices)
-    created_on = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self) -> str:
-        return self.title
-
-
 class Milestone(models.Model):
     title = models.CharField(max_length=200)
     timeline = models.ForeignKey(
@@ -89,10 +92,12 @@ class Task(models.Model):
     def __str__(self) -> str:
         return self.title
 
+
 class TaskTag(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE)
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
+
 
 class TimelineTask(models.Model):
     timeline = models.ForeignKey(
