@@ -17,6 +17,7 @@ class Timeline(models.Model):
     )
     subject = models.CharField(max_length=3, choices=Subject.choices)
     created_on = models.DateTimeField(auto_now_add=True)
+    privacy = models.CharField(max_length=10, choices=Subject.choices)
 
     def __str__(self) -> str:
         return self.title
