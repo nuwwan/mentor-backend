@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate
 
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,permission_classes
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
@@ -10,6 +10,7 @@ from .models import AuthUser
 
 
 @api_view(["POST"])
+@permission_classes([])
 def register_view(request):
     data = request.data
     email = data.get("email")
@@ -43,6 +44,7 @@ def register_view(request):
 
 
 @api_view(["POST"])
+@permission_classes([])
 def login_view(request):
     data = request.data
     email = data.get("email")
