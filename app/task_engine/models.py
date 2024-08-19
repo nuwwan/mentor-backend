@@ -1,6 +1,6 @@
 from django.db import models
 from user.models import AuthUser
-from .enums import Subject
+from .enums import Subject, PrivacyChoices
 
 
 class Tag(models.Model):
@@ -17,7 +17,7 @@ class Timeline(models.Model):
     )
     subject = models.CharField(max_length=3, choices=Subject.choices)
     created_on = models.DateTimeField(auto_now_add=True)
-    privacy = models.CharField(max_length=10, choices=Subject.choices)
+    privacy = models.CharField(max_length=10, choices=PrivacyChoices.choices)
 
     def __str__(self) -> str:
         return self.title

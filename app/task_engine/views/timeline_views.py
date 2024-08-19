@@ -19,6 +19,9 @@ class TimelinesList(generics.ListCreateAPIView):
     def get_queryset(self):
         return Timeline.objects.filter(user=self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 # Timeline details view
 class TimelineDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -27,6 +30,9 @@ class TimelineDetail(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         return Timeline.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
 
 
 """
@@ -80,14 +86,17 @@ class AssignTimelineToMentor(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            mentorship = Mentorship.objects.create(
+            mentorship = Mentorship.objects.get_or_create(
                 mentor=mentor,
                 mentee=logged_in_user,
                 timeline=timeline,
                 subject=subject,
             )
             return Response(
-                data={"message": "Successfully created", "mentorship": mentorship.id},
+                data={
+                    "message": "Successfully created",
+                    "mentorship": mentorship[0].id,
+                },
                 status=status.HTTP_201_CREATED,
             )
 
