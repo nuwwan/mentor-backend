@@ -57,12 +57,16 @@ class TestTimelineList(BaseTestTimeline):
     def test_get_user_timeline(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
         # Create timelines first
-        data = {"title": "Timeline 1", "subject": "fin", "privacy": "pub"}
-        response = self.client.post(self.url, data, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # Test the get timelines
-        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
         response = self.client.get(self.url, format="json")
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
 
@@ -77,22 +81,30 @@ class TestTimelineDetail(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # Get the timeline where id=1
         response = self.client.get(self.url, format="json")
-        timeline = response.data
+        response_timeline = response.data
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(timeline.get("title"), "Timeline 1")
+        self.assertEqual(response_timeline.get("title"), "Timeline 1")
 
     def test_update_timeline_detail(self):
         # Authenticate the user
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # update the timeline where id=1
         new_data = {**timeline_payload, "title": "Timeline 2"}
@@ -105,8 +117,12 @@ class TestTimelineDetail(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # update the timeline where id=1
         new_data = {"title": "Timeline 2"}
@@ -119,9 +135,12 @@ class TestTimelineDetail(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
-
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
         # remove the timeline where id=1
         response = self.client.delete(self.url, format="json")
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
@@ -137,13 +156,17 @@ class TestAssignTimelineToMentor(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # create a timeline
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # assign mentor
         mentor_data_payload = {
             "mentor": self.mentor.id,
-            "timeline": response.data.get("id"),
+            "timeline": timeline.id,
             "subject": "fin",
         }
         response = self.client.post(self.url, mentor_data_payload, format="json")
@@ -155,13 +178,18 @@ class TestAssignTimelineToMentor(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # create a timeline
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
+
         strage_mentor_id = 123
         # assign mentor
         mentor_data_payload = {
             "mentor": strage_mentor_id,
-            "timeline": response.data.get("id"),
+            "timeline": timeline.id,
             "subject": "fin",
         }
         response = self.client.post(self.url, mentor_data_payload, format="json")
@@ -188,13 +216,17 @@ class TestAssignTimelineToMentor(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # create a timeline
-        create_url = reverse("timeline_list")
-        response = self.client.post(create_url, timeline_payload, format="json")
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            user=self.user,
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+        )
 
         # assign mentor
         mentor_data_payload = {
             "mentor": self.mentor.id,
-            "timeline": response.data.get("id"),
+            "timeline": timeline.id,
         }
         response = self.client.post(self.url, mentor_data_payload, format="json")
 
