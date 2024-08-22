@@ -3,17 +3,17 @@
 ## How to Setup
 
 ## Test
-Run all tests.
+1. Run all tests.
 ```
 coverage run manage.py test
 ```
 
-Run a specefic Tests File.
+2. Run a specefic Tests File.
 ```
 python manage.py test myapp.tests.test_views
 ```
 
-Run a Specific Tests class
+3. Run a Specific Tests class
 ```
 python manage.py test path.to.your.test_module.TestClassName
 ```
@@ -23,12 +23,12 @@ For example, if you want to run a specific test class named MyViewTest in myapp/
 python manage.py test myapp.tests.test_views.MyViewTest
 ```
 
-Get the Tests coverage Report.
+4. Get the Tests coverage Report.
 ```
 coverage report
 ```
 
-Get the TestS Coverage in HTML
+5. Get the TestS Coverage in HTML
 ```
 coverage html
 ```
