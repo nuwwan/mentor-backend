@@ -57,7 +57,7 @@ class TestTimelineList(BaseTestTimeline):
     def test_get_user_timeline(self):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
         # Create timelines first
-        timeline = Timeline.objects.create(
+        Timeline.objects.create(
             title=timeline_payload.get("title"),
             user=self.user,
             subject=timeline_payload.get("subject"),
@@ -81,7 +81,7 @@ class TestTimelineDetail(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        timeline = Timeline.objects.create(
+        Timeline.objects.create(
             title=timeline_payload.get("title"),
             user=self.user,
             subject=timeline_payload.get("subject"),
@@ -99,7 +99,7 @@ class TestTimelineDetail(BaseTestTimeline):
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        timeline = Timeline.objects.create(
+        Timeline.objects.create(
             title=timeline_payload.get("title"),
             user=self.user,
             subject=timeline_payload.get("subject"),
@@ -110,14 +110,14 @@ class TestTimelineDetail(BaseTestTimeline):
         new_data = {**timeline_payload, "title": "Timeline 2"}
         response = self.client.put(self.url, new_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get("title"), "Timeline 2")
+        self.assertEqual(response.data.get("title"), new_data.get("title"))
 
     def test_patch_timeline_detail(self):
         # Authenticate the user
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        timeline = Timeline.objects.create(
+        Timeline.objects.create(
             title=timeline_payload.get("title"),
             user=self.user,
             subject=timeline_payload.get("subject"),
@@ -128,14 +128,14 @@ class TestTimelineDetail(BaseTestTimeline):
         new_data = {"title": "Timeline 2"}
         response = self.client.patch(self.url, new_data, format="json")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data.get("title"), "Timeline 2")
+        self.assertEqual(response.data.get("title"), new_data.get("title"))
 
     def test_remove_timeline_detail(self):
         # Authenticate the user
         self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
 
         # Create a timeline object
-        timeline = Timeline.objects.create(
+        Timeline.objects.create(
             title=timeline_payload.get("title"),
             user=self.user,
             subject=timeline_payload.get("subject"),
@@ -251,7 +251,7 @@ class TestGetTimelineForMentor(BaseTestTimeline):
         )
 
         # assign mentor
-        mentorship = Mentorship.objects.create(
+        Mentorship.objects.create(
             mentor=self.mentor, mentee=self.user, timeline=timeline, subject="fin"
         )
 
