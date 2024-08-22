@@ -19,6 +19,9 @@ class TimelinesList(generics.ListCreateAPIView):
     def get_queryset(self):
         return Timeline.objects.filter(user=self.request.user)
 
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
 
 # Timeline details view
 class TimelineDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -35,17 +38,13 @@ Get all timelines a mentor is asigned for.
 
 
 class GetTimelinesForMentor(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
-        try:
-            mentorships = Mentorship.objects.filter(mentor=request.user)
-            timelines = [m.timeline for m in mentorships]
-            parsed_data = TimelineSerializer(timelines, many=True)
-            return Response(data=parsed_data.data, status=status.HTTP_200_OK)
-        except Exception as ex:
-            return Response(
-                data={"message": "Operation Failed"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            )
+        mentorships = Mentorship.objects.filter(mentor=request.user)
+        timelines = [m.timeline for m in mentorships]
+        parsed_data = TimelineSerializer(timelines, many=True)
+        return Response(data=parsed_data.data, status=status.HTTP_200_OK)
 
 
 """
@@ -67,8 +66,8 @@ class AssignTimelineToMentor(APIView):
             mentor_id = payload.get("mentor", None)
             subject = payload.get("subject", None)
 
-            mentor = AuthUser.objects.get(id=mentor_id)
-            timeline = Timeline.objects.get(id=timeline_id)
+            mentor = AuthUser.objects.filter(id=mentor_id).first()
+            timeline = Timeline.objects.filter(id=timeline_id).first()
             if mentor is None:
                 return Response(
                     data={"message": "Mentor does not Exist"},
@@ -80,14 +79,17 @@ class AssignTimelineToMentor(APIView):
                     status=status.HTTP_404_NOT_FOUND,
                 )
 
-            mentorship = Mentorship.objects.create(
+            mentorship = Mentorship.objects.get_or_create(
                 mentor=mentor,
                 mentee=logged_in_user,
                 timeline=timeline,
                 subject=subject,
             )
             return Response(
-                data={"message": "Successfully created", "mentorship": mentorship.id},
+                data={
+                    "message": "Successfully created",
+                    "mentorship": mentorship[0].id,
+                },
                 status=status.HTTP_201_CREATED,
             )
 

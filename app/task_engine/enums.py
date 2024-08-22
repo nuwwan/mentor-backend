@@ -7,6 +7,6 @@ class Subject(models.TextChoices):
 
 
 class PrivacyChoices(models.TextChoices):
-    OWNER_ONLY = "owner", "Owner Only"
-    MENTOR_OWNER = "mentor_owner", "Mentor Owner"
-    PUBLIC = "public", "Public"
+    OWNER_ONLY = "own", "Owner Only"
+    MENTOR_OWNER = "mnt_own", "Mentor Owner"
+    PUBLIC = "pub", "Public"
