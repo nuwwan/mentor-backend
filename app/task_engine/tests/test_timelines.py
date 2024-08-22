@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from authentication.utils import generate_jwt_token
 from rest_framework import status
 from rest_framework.test import APITestCase
-from task_engine.models import Timeline
+from task_engine.models import Timeline, Mentorship
 from app.utility import CONFIG_SAMPLE_TEST_USER, CONFIG_SAMPLE_TEST_USER_MENTOR
 
 AuthUser = get_user_model()
@@ -23,6 +23,7 @@ class BaseTestTimeline(APITestCase):
             first_name=CONFIG_SAMPLE_TEST_USER.get("firstname"),
             last_name=CONFIG_SAMPLE_TEST_USER.get("lastname"),
         )
+        self.user = test_user
         self.token = generate_jwt_token(test_user)
 
         # create mentor
@@ -33,6 +34,7 @@ class BaseTestTimeline(APITestCase):
             last_name=CONFIG_SAMPLE_TEST_USER_MENTOR.get("lastname"),
         )
         self.mentor = test_user_mentor
+        self.mentor_token = generate_jwt_token(test_user_mentor)
 
         return super().setUp()
 
@@ -147,3 +149,90 @@ class TestAssignTimelineToMentor(BaseTestTimeline):
         response = self.client.post(self.url, mentor_data_payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_mentor_does_not_exists(self):
+        # Authenticate the user
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create a timeline
+        create_url = reverse("timeline_list")
+        response = self.client.post(create_url, timeline_payload, format="json")
+        strage_mentor_id = 123
+        # assign mentor
+        mentor_data_payload = {
+            "mentor": strage_mentor_id,
+            "timeline": response.data.get("id"),
+            "subject": "fin",
+        }
+        response = self.client.post(self.url, mentor_data_payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_timeline_does_not_exists(self):
+        # Authenticate the user
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        strage_timeline_id = 123
+        # assign mentor
+        mentor_data_payload = {
+            "mentor": self.mentor.id,
+            "timeline": strage_timeline_id,
+            "subject": "fin",
+        }
+        response = self.client.post(self.url, mentor_data_payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_incorrect_payload(self):
+        # Authenticate the user
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create a timeline
+        create_url = reverse("timeline_list")
+        response = self.client.post(create_url, timeline_payload, format="json")
+
+        # assign mentor
+        mentor_data_payload = {
+            "mentor": self.mentor.id,
+            "timeline": response.data.get("id"),
+        }
+        response = self.client.post(self.url, mentor_data_payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class TestGetTimelineForMentor(BaseTestTimeline):
+    def __init__(self, methodName: str = "runTest") -> None:
+        self.url = reverse("get_mentoring_timeline_for_mentor")
+        super().__init__(methodName)
+
+    def test_get_mentor_timelines(self):
+        # Authenticate the user
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.mentor_token)
+
+        # create a timeline
+        timeline = Timeline.objects.create(
+            title=timeline_payload.get("title"),
+            subject=timeline_payload.get("subject"),
+            privacy=timeline_payload.get("privacy"),
+            user=self.user,
+        )
+
+        # assign mentor
+        mentorship = Mentorship.objects.create(
+            mentor=self.mentor, mentee=self.user, timeline=timeline, subject="fin"
+        )
+
+        # get mentor timelines
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
+
+    def test_get_mentor_timelines_for_no_records(self):
+        # Authenticate the user
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.mentor_token)
+
+        # get mentor timelines
+        response = self.client.get(self.url, format="json")
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 0)
