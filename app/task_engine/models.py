@@ -1,13 +1,22 @@
 from django.db import models
+from task_engine.custom_model_validators import no_spaces_validator
 from user.models import AuthUser
 from .enums import Subject, PrivacyChoices
 
 
 class Tag(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=50, validators=[no_spaces_validator])
+    author = models.ForeignKey(AuthUser, on_delete=models.CASCADE, related_name="tags")
+    created_on = models.DateTimeField(auto_now_add=True)
 
     def __str__(self) -> str:
         return self.title
+
+    def save(self, *args, **kwargs):
+        self.title = self.title.replace(
+            " ", ""
+        ).lower()  # Automatically remove spaces and convert to lower case
+        super().save(*args, **kwargs)
 
 
 class Timeline(models.Model):

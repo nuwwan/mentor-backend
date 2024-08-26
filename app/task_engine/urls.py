@@ -6,6 +6,7 @@ from .views.timeline_views import (
     GetTimelinesForMentor,
     AssignTimelineToMentor,
 )
+from .views.tags_views import CreateTag
 
 urlpatterns = [
     path("timeline/", TimelinesList.as_view(), name="timeline_list"),
@@ -20,5 +21,6 @@ urlpatterns = [
         AssignTimelineToMentor.as_view(),
         name="add_mentor_to_timeline",
     ),
+    path("tag/", CreateTag.as_view(), name="create_tag"),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
