@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, ValidationError
 from .models import Timeline, Tag
 
 
@@ -14,3 +14,9 @@ class TagSerializer(ModelSerializer):
         model = Tag
         fields = "__all__"
         read_only_fields = ["author"]
+
+    def validate_title(self, value):
+        # Check if a book with the given title already exists
+        if Tag.objects.filter(title=value).exists():
+            raise ValidationError("A book with this title already exists.")
+        return value
