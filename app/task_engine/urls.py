@@ -21,6 +21,6 @@ urlpatterns = [
         AssignTimelineToMentor.as_view(),
         name="add_mentor_to_timeline",
     ),
-    path("tag/", CreateTag.as_view(), name="create_tag"),
+    path("tag/", CreateTag.as_view(), name="tag_list"),
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

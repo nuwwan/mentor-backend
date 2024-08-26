@@ -29,7 +29,7 @@ class BaseTagTest(APITestCase):
 
 class TestCreateTag(BaseTagTest):
     def __init__(self, methodName: str = "runTest") -> None:
-        self.url = reverse("create_tag")
+        self.url = reverse("tag_list")
         super().__init__(methodName)
 
     def test_create_single_tag(self):
@@ -68,3 +68,64 @@ class TestCreateTag(BaseTagTest):
         response = self.client.post(self.url, tag_payload, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_existing_tag(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create an object first
+        tag_title = "tag1"
+        tag = Tag.objects.create(title=tag_title, author=self.user)
+
+        tag_payload = {"title": tag_title}
+
+        # call backend
+        response = self.client.post(self.url, tag_payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+
+class TestGetAllTags(BaseTagTest):
+    def __init__(self, methodName: str = "runTest") -> None:
+        self.url = reverse("tag_list")
+        super().__init__(methodName)
+
+    def test_get_all_tags(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create some objects
+        tags = [Tag(title=f"test{i}", author=self.user) for i in range(3)]
+        tags = [
+            *tags,
+            Tag(title="some1", author=self.user),
+            Tag(title="some2", author=self.user),
+        ]
+
+        Tag.objects.bulk_create(tags)
+        prefix = "test"
+        url = f"{self.url}?title={prefix}"
+        response = self.client.get(url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # 3 tags should be fetched having title='test
+        self.assertEqual(len(response.data), 3)
+
+    def test_short_prefix(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create some objects
+        Tag.objects.create(title=test_tag_payload.get("title"), author=self.user)
+
+        prefix = "te"
+        url = f"{self.url}?title={prefix}"
+        response = self.client.get(url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_no_prefix(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer " + self.token)
+
+        # create some objects
+        Tag.objects.create(title=test_tag_payload.get("title"), author=self.user)
+        response = self.client.get(self.url, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_500_INTERNAL_SERVER_ERROR)
